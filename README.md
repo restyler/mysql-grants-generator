@@ -4,12 +4,12 @@ This script uses MySQL connection to inspect information_schema and MySQL databa
 
 THE PROBLEM
 =================
-Imagine you have database with 200 tables and table 'user' has 50 columns.
-You need to restrict read access to columns  user.email, user.phone and user.password for MySQL read-only user which is used by analytics software, e.g. Metabase. You also want to completely restrict access to table secret_table.
-You also want new tables and new columns, which appear in the database during application lifetime (by running migrations) to work seamlessly and be available for analysis. 
+Imagine you have database with 200 tables and table `user` has 50 columns.
+You need to restrict read access to columns  `user.email`, `user.phone` and `user.password` for MySQL read-only user which is used by analytics software, e.g. Metabase. You also want to completely restrict access to table `secret_table`.
+You also want new tables and new columns, which appear in the database during application lifetime (by running migrations) to work seamlessly and be available for analysis right away. 
 
 Basically, you need to write `GRANT SELECT, SHOW VIEW ON db.table1 TO metabaseuser;` for every whitelisted table.
-For column granular access you need something like `GRANT SELECT ( `id`,`userName`,`alias`,`firstName`,`lastName`,`status`,`createdAt`, ....) ON db.table1 TO metabaseuser;` for user table, mentioning each column EXCEPT the private ones which are email and phone, and password.
+For column granular access you need something like `GRANT SELECT ( id,userName,alias,firstName,lastName,status,createdAt, ....) ON db.table1 TO metabaseuser;` for user table, mentioning each column EXCEPT the private ones which are email and phone, and password.
 
 MySQL GRANTS system has only whitelist approach implemented, so you need to explicitly specify each column in a table, and specify each table which you want to give GRANTS to, which is a lot of manual work.
 Here is an article on how it can be done semi-manually: https://chartio.com/learn/databases/grant-permissions-for-mysql/
