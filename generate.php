@@ -1,27 +1,25 @@
 <?php
 $config = require 'config.php';
 
-require_once 'db.php';
-
+require_once 'DB.php'; 
 
 
 function getTableColumns($dbname, $tablename, $excludeColumns = [])
 {
-    $sql = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=? AND TABLE_NAME=? ";
-    $params = [$dbname, $tablename];
-
-    if (count($excludeColumns)) {
-        $sql .= 'AND COLUMN_NAME NOT IN (\'' . implode('\',\'', $excludeColumns) . '\')';
+    $sql = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=?s AND TABLE_NAME=?s ";
+    if (!count($excludeColumns)) {
+        return DB::q($sql, $dbname, $tablename)->fetchAll(PDO::FETCH_COLUMN);
+    } else {
+        $sql .= ' AND COLUMN_NAME NOT IN ?a';
+        return DB::q($sql, $dbname, $tablename, $excludeColumns)->fetchAll(PDO::FETCH_COLUMN);
     }
-
-    return DB::run($sql, $params)->fetchAll(PDO::FETCH_COLUMN);
 }
 
 function getTablePrivileges($privileges, $dbname, $tablename, $username)
 {
-    $tablePrivileges = DB::run("SELECT PRIVILEGE_TYPE FROM information_schema.TABLE_PRIVILEGES WHERE TABLE_SCHEMA=? AND TABLE_NAME=? AND GRANTEE=? AND PRIVILEGE_TYPE IN('" . implode("','", $privileges) . "')", [$dbname, $tablename, $username])->fetchAll(PDO::FETCH_COLUMN);
+    $tablePrivileges = DB::q("SELECT PRIVILEGE_TYPE FROM information_schema.TABLE_PRIVILEGES WHERE TABLE_SCHEMA=?s AND TABLE_NAME=?s AND GRANTEE=?s AND PRIVILEGE_TYPE IN ?a", $dbname, $tablename, $username, $privileges)->fetchAll(PDO::FETCH_COLUMN);
 
-    $columnPrivileges = DB::run("SELECT DISTINCT(PRIVILEGE_TYPE) FROM information_schema.COLUMN_PRIVILEGES WHERE TABLE_SCHEMA=? AND TABLE_NAME=? AND GRANTEE=? AND PRIVILEGE_TYPE IN('" . implode("','", $privileges) . "')", [$dbname, $tablename, $username])->fetchAll(PDO::FETCH_COLUMN);
+    $columnPrivileges = DB::q("SELECT DISTINCT(PRIVILEGE_TYPE) FROM information_schema.COLUMN_PRIVILEGES WHERE TABLE_SCHEMA=?s AND TABLE_NAME=?s AND GRANTEE=?s AND PRIVILEGE_TYPE IN ?a", $dbname, $tablename, $username, $privileges)->fetchAll(PDO::FETCH_COLUMN);
 
     // since REVOKE is clever enough to remove all grants from TABLE_PRIVILEGES and COLUMN_PRIVILEGES
     // we just need one mention of proper grant so return something like ['SELECT', 'SHOW VIEW']
@@ -33,7 +31,7 @@ $generatedSql = [];
 
 $dbUserSplit = explode("'@'", trim($config['user_to_restrict'], " '"));
 
-$userExists = DB::run("SELECT COUNT(*) FROM mysql.user WHERE User=? AND Host=?", $dbUserSplit)->fetchColumn();
+$userExists = DB::q("SELECT COUNT(*) FROM mysql.user WHERE User=?s AND Host=?s", $dbUserSplit[0], $dbUserSplit[1])->fetchColumn();
 
 if (!$userExists) {
     printf('no such user in db: %s',  $config['user_to_restrict']) . "\n";
@@ -44,7 +42,7 @@ if (!$userExists) {
 foreach ($config['databases_to_allow'] as $dbname) {
     $protectionConfig = $config['tables_to_protect'][$dbname] ?? [];
 
-    $tables = DB::run("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=? ", [$dbname])->fetchAll(PDO::FETCH_COLUMN);
+    $tables = DB::q("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=?s ", $dbname)->fetchAll(PDO::FETCH_COLUMN);
 
     if (count($tables)) {
         // @TODO: remove global perms on db in case they exist

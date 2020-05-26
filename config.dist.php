@@ -1,14 +1,12 @@
 <?php
 
-return [
-    // MySQL connection info to inspect metadata. User can be read-only.
-    'db' => [
-        'host' => '127.0.0.1',
-        'user' => 'user',
-        'password' => 'pass',
-        'charset' => 'utf8'
-    ],
+// MySQL connection info to inspect metadata. User can be read-only.
+const DB_HOST = '127.0.0.1';
+const DB_NAME = 'information_schema'; // DB_NAME to avoid PDO wrapper exception during startup.
+const DB_USER = 'dbuser';
+const DB_PASS = 'dbpass';
 
+return [
     // main config
 
     // mysql format of user is single quoted username + '@' + single quoted host
