@@ -14,7 +14,7 @@ For column granular access you need something like `GRANT SELECT ( id,userName,a
 MySQL GRANTS system has only whitelist approach implemented, so you need to explicitly specify each column in a table, and specify each table which you want to give GRANTS to, which is a lot of manual work.
 Here is an article on how it can be done semi-manually: https://chartio.com/learn/databases/grant-permissions-for-mysql/
 
-If you've earlier granted some table access and then decided to forbid access to it, you need to write REVOKE operation, which has an important caveat in MySQL - REVOKE throws errors if such GRANT did not exist, so before REVOKING something you need to grok through SHOW GRANTS for the restricted user and make sure such grants exist - this makes it difficult to write idempotent queries where you REVOKE "just in case" - you need to fiddle around ignoring MySQL exceptions here.
+If you've earlier granted some table access and then decided to forbid access to it, you need to write REVOKE operation, which has an important caveat in MySQL - REVOKE throws errors if such GRANT did not exist, so before REVOKING something you need to grok through SHOW GRANTS for the restricted user and make sure such grants exist - this makes it difficult to write idempotent queries where you REVOKE "just in case" - you need to fiddle around ignoring MySQL exceptions: https://stackoverflow.com/questions/43867038/mysql-revoke-privilege-if-exists
 
 
 This script tries to solve these issues to make GRANTS works in a blacklist way where only protected tables and columns need to be specified, and it tries to be stateless in terms of revoking table permissions - you don't need to know beforehand if some GRANTS exists if you want to REVOKE it.
