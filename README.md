@@ -20,6 +20,19 @@ If you've earlier granted some table access and then decided to forbid access to
 This script tries to solve these issues to make GRANTS works in a blacklist way where only protected tables and columns need to be specified, and it tries to be stateless in terms of revoking table permissions - you don't need to know beforehand if some GRANTS exists if you want to REVOKE it.
 
 
+USAGE
+=================
+```
+git clone https://github.com/restyler/mysql-grants-generator
+cd mysql-grants-generator
+cp config.dist.php config.php
+nano config.php
+php generate.php > fixaccess.sql
+mysql < fixaccess.sql
+```
+generate.php launch and its output execution may be included in the deploy process after migrations running to add new tables to grants automatically.
+
+
 BAD CODE WARNING
 ============
 This is an alpha-quality quick & dirty script with bad PHP practices all over the place, which is designed to be self-contained zero-dependency and thinks that the input comes from a reliable source, so there is no proper SQL injection protection!
