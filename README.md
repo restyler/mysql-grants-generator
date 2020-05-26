@@ -1,6 +1,6 @@
 Utility to restrict MySQL user (read) access to tables and columns.
 This script does not write anything to MySQL but generates SQL statements to output which can be executed after inspection.
-This script uses MySQL connection to inspect information_schema and MySQL databases and was tested on MySQL 5.7.
+This script inspects `information_schema` and `mysql` databases to generate GRANT statements and was tested on MySQL 5.7.
 
 THE PROBLEM
 =================
