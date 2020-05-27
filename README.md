@@ -1,6 +1,6 @@
 Utility to restrict MySQL user (read) access to tables and columns.
 This script does not write anything to MySQL but generates SQL statements to output which can be inspected and executed.
-This script inspects `information_schema` and `mysql` databases to generate GRANT statements and was tested on MySQL 5.7 and PHP 7.3.
+This script inspects `information_schema` and `mysql` databases to generate GRANT and REVOKE statements and was tested on MySQL 5.7 and PHP 7.3.
 
 THE PROBLEM
 =================
@@ -15,9 +15,10 @@ MySQL GRANTS system has only whitelist approach implemented, so you need to expl
 Here is an article on how it can be done semi-manually: https://chartio.com/learn/databases/grant-permissions-for-mysql/
 
 If you've earlier granted some table access and then decided to forbid access to it, you need to write REVOKE operation, which has an important caveat in MySQL - REVOKE throws errors if such GRANT did not exist, so before REVOKING something you need to grok through SHOW GRANTS for the restricted user and make sure such grants exist - this makes it difficult to write idempotent queries where you REVOKE "just in case" - you need to fiddle around ignoring MySQL exceptions: https://stackoverflow.com/questions/43867038/mysql-revoke-privilege-if-exists
+Another non-obvious "feature" of REVOKE is that if you earlier gave some user GRANT on specific table, then `REVOKE SELECT ON dbname.*` (which you might think should remove all GRANTS on all tables inside database) won't remove this specific table permission, and will also throw "There is no such grant defined for user" as mentioned earlier. You need to be specific and write `REVOKE SELECT ON dbname.tablename FOR username`.
 
 
-This script tries to solve these issues to make GRANTS works in a blacklist way where only protected tables and columns need to be specified, and it tries to be stateless in terms of revoking table permissions - you don't need to know beforehand if some GRANTS exists if you want to REVOKE it.
+This script tries to solve these issues and works in a more predictable way where only allowed databases, with protected tables and columns, need to be specified, and it tries to be stateless in terms of revoking db and table permissions - you don't need to know beforehand if some GRANTS exists if you want to REVOKE it.
 
 INSTALLATION
 =================
