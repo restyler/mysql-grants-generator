@@ -1,6 +1,6 @@
 Utility to restrict MySQL user (read) access to tables and columns.
-This script does not write anything to MySQL but generates SQL statements to output which can be executed after inspection.
-This script inspects `information_schema` and `mysql` databases to generate GRANT statements and was tested on MySQL 5.7.
+This script does not write anything to MySQL but generates SQL statements to output which can be inspected and executed.
+This script inspects `information_schema` and `mysql` databases to generate GRANT statements and was tested on MySQL 5.7 and PHP 7.3.
 
 THE PROBLEM
 =================
@@ -19,18 +19,21 @@ If you've earlier granted some table access and then decided to forbid access to
 
 This script tries to solve these issues to make GRANTS works in a blacklist way where only protected tables and columns need to be specified, and it tries to be stateless in terms of revoking table permissions - you don't need to know beforehand if some GRANTS exists if you want to REVOKE it.
 
-
-USAGE
+INSTALLATION
 =================
 ```
 git clone https://github.com/restyler/mysql-grants-generator
 cd mysql-grants-generator
 cp config.dist.php config.php
 nano config.php
+```
+USAGE
+=================
+```
 php generate.php > fixaccess.sql
 mysql < fixaccess.sql
 ```
-generate.php launch and its output execution may be included in the deploy process after migrations running to add new tables to grants automatically.
+This may be included in the deploy process after migrations execution to update grants automatically.
 
 
 BAD CODE WARNING
